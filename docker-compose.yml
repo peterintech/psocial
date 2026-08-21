@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16.3
+    container_name: psocial
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: peterharvard210
+      POSTGRES_DB: psocial
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data:
