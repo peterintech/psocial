@@ -1,10 +1,18 @@
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+
+	"github.com/joho/godotenv"
+	"github.com/peterintech/psocial/internal/env"
+)
 
 func main() {
+	godotenv.Load(".env")
+
 	cfg := config{
-		addr: ":8080",
+		addr: fmt.Sprintf(":%s", env.GetEnv("PORT", "8080")),
 	}
 
 	app := &application{
