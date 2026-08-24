@@ -29,6 +29,9 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at`
 
+	ctx, cancel := context.WithTimeout(ctx, ctxDuration)
+	defer cancel()
+
 	err := s.db.QueryRowContext(ctx, query, post.Content, post.Title, pq.Array(post.Tags), post.UserID).Scan(&post.ID, &post.CreatedAt, &post.UpdatedAt)
 
 	return err
@@ -55,6 +58,9 @@ func (s *PostStore) GetByID(ctx context.Context, postID string) (*Post, error) {
 func (s *PostStore) Update(ctx context.Context, post *Post) error {
 	query := `UPDATE posts SET content = $1, title = $2, tags = $3, updated_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = $4 AND version = $5 RETURNING updated_at, version`
 
+	ctx, cancel := context.WithTimeout(ctx, ctxDuration)
+	defer cancel()
+
 	err := s.db.QueryRowContext(ctx, query, post.Content, post.Title, pq.Array(post.Tags), post.ID, post.Version).Scan(&post.UpdatedAt, &post.Version)
 
 	if err != nil {
@@ -71,6 +77,9 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 
 func (s *PostStore) Delete(ctx context.Context, postID string) error {
 	query := `DELETE FROM posts WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(ctx, ctxDuration)
+	defer cancel()
 
 	result, err := s.db.ExecContext(ctx, query, postID)
 	if err != nil {

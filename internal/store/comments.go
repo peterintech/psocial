@@ -17,6 +17,19 @@ type CommentStore struct {
 	db *sql.DB
 }
 
+func (s *CommentStore) Create(ctx context.Context, comment *Comment) error {
+	query := `INSERT INTO comments (content, post_id, user_id)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at`
+
+	ctx, cancel := context.WithTimeout(ctx, ctxDuration)
+	defer cancel()
+
+	err := s.db.QueryRowContext(ctx, query, comment.Content, comment.PostID, comment.UserID).Scan(&comment.ID, &comment.CreatedAt)
+
+	return err
+}
+
 func (s *CommentStore) GetByPostID(ctx context.Context, postID string) ([]Comment, error) {
 	query := `SELECT c.id, c.content, c.post_id, c.user_id, c.created_at, u.username
 	FROM comments c
