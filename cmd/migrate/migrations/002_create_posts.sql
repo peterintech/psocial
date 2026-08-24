@@ -5,7 +5,9 @@ CREATE TABLE
         user_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
         title VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        tags VARCHAR(100)[],
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
 -- +goose Down

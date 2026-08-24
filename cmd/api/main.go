@@ -10,11 +10,14 @@ import (
 	"github.com/peterintech/psocial/internal/store"
 )
 
+const version = "1.0.0"
+
 func main() {
 	godotenv.Load(".env")
 
 	cfg := config{
 		addr: fmt.Sprintf(":%s", env.GetEnv("PORT", "8080")),
+		env:  env.GetEnv("ENV", "development"),
 		db: dbConfig{
 			addr:         env.GetEnv("DB_ADDR", "postgres://postgres:postgres@localhost:5432/psocial?sslmode=disable"),
 			maxOpenConns: env.GetEnvAsInt("DB_MAX_OPEN_CONNS", 30),
@@ -31,7 +34,7 @@ func main() {
 
 	defer db.Close()
 
-	store := store.NewStorage(nil)
+	store := store.NewStorage(db)
 
 	app := &application{
 		config: cfg,
