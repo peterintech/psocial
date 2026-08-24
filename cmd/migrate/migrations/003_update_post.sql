@@ -1,0 +1,7 @@
+-- +goose Up
+ALTER TABLE posts
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- +goose Down
+ALTER TABLE posts
+DROP COLUMN IF EXISTS updated_at;
