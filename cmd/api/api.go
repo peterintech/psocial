@@ -54,6 +54,17 @@ func (app *application) mount() *chi.Mux {
 				})
 			})
 		})
+		r.Route("/users", func(r chi.Router) {
+			// r.Post("/", app.createUserHandler)
+
+			r.Route("/{userID}", func(r chi.Router) {
+				// r.Use(app.userContextMiddleware)
+
+				r.Get("/", app.getUserHandler)
+				// r.Patch("/", app.updateUserHandler)
+				// r.Delete("/", app.deleteUserHandler)
+			})
+		})
 	})
 
 	return r
