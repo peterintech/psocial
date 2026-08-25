@@ -58,9 +58,11 @@ func (app *application) mount() *chi.Mux {
 			// r.Post("/", app.createUserHandler)
 
 			r.Route("/{userID}", func(r chi.Router) {
-				// r.Use(app.userContextMiddleware)
+				r.Use(app.userContextMiddleware)
 
 				r.Get("/", app.getUserHandler)
+				r.Put("/follow", app.followUserHandler)
+				r.Put("/unfollow", app.unfollowUserHandler)
 				// r.Patch("/", app.updateUserHandler)
 				// r.Delete("/", app.deleteUserHandler)
 			})

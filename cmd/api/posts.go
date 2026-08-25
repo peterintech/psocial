@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/peterintech/psocial/internal/store"
@@ -38,7 +37,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		Tags:    payload.Tags,
 		Version: 1,
 		// todo: change after auth
-		UserID: 1,
+		UserID: "1",
 	}
 
 	ctx := r.Context()
@@ -65,7 +64,7 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	comments, err := app.store.Comments.GetByPostID(ctx, strconv.Itoa(int(post.ID)))
+	comments, err := app.store.Comments.GetByPostID(ctx, post.ID)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return

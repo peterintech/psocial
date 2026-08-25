@@ -6,10 +6,10 @@ import (
 )
 
 type Comment struct {
-	ID        int64  `json:"id"`
+	ID        string `json:"id"`
 	Content   string `json:"content"`
-	PostID    int64  `json:"post_id"`
-	UserID    int64  `json:"user_id"`
+	PostID    string `json:"post_id"`
+	UserID    string `json:"user_id"`
 	Username  string `json:"username"`
 	CreatedAt string `json:"created_at"`
 }
@@ -23,7 +23,7 @@ func (s *CommentStore) Create(ctx context.Context, comment *Comment) error {
 		VALUES ($1, $2, $3)
 		RETURNING id, created_at`
 
-	ctx, cancel := context.WithTimeout(ctx, ctxDuration)
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
 	defer cancel()
 
 	err := s.db.QueryRowContext(ctx, query, comment.Content, comment.PostID, comment.UserID).Scan(&comment.ID, &comment.CreatedAt)
