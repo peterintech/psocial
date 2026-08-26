@@ -19,6 +19,18 @@ type CreatePostPayload struct {
 	Tags    []string `json:"tags"`
 }
 
+// CreatePost godoc
+//
+//	@Summary		Create a post
+//	@Description	Creates a new post with title, content, and optional tags
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			payload	body		CreatePostPayload	true	"Post payload"
+//	@Success		201		{object}	store.Post
+//	@Failure		400		{object}	error
+//	@Failure		500		{object}	error
+//	@Router			/posts [post]
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	var payload CreatePostPayload
 	if err := readJSON(w, r, &payload); err != nil {
@@ -55,6 +67,19 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 
 }
 
+// GetPost godoc
+//
+//	@Summary		Get a post
+//	@Description	Fetches a post by ID with its comments
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			postID	path		string	true	"Post ID"
+//	@Success		200		{object}	store.Post
+//	@Failure		400		{object}	error
+//	@Failure		404		{object}	error
+//	@Failure		500		{object}	error
+//	@Router			/posts/{postID} [get]
 func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	post, err := getPostFromContext(r.Context())
 	if err != nil {
@@ -84,6 +109,20 @@ type UpdatePostPayload struct {
 	Tags    *[]string `json:"tags"`
 }
 
+// UpdatePost godoc
+//
+//	@Summary		Update a post
+//	@Description	Partially updates a post's title, content, and/or tags
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			postID	path		string				true	"Post ID"
+//	@Param			payload	body		UpdatePostPayload	true	"Post payload"
+//	@Success		200		{object}	store.Post
+//	@Failure		400		{object}	error
+//	@Failure		404		{object}	error
+//	@Failure		500		{object}	error
+//	@Router			/posts/{postID} [patch]
 func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	post, err := getPostFromContext(r.Context())
 	if err != nil {
@@ -123,6 +162,19 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// DeletePost godoc
+//
+//	@Summary		Delete a post
+//	@Description	Deletes a post by ID
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			postID	path		string	true	"Post ID"
+//	@Success		200		{object}	map[string]string
+//	@Failure		400		{object}	error
+//	@Failure		404		{object}	error
+//	@Failure		500		{object}	error
+//	@Router			/posts/{postID} [delete]
 func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	postID := chi.URLParam(r, "postID")
 	if postID == "" {

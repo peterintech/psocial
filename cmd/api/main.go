@@ -12,12 +12,32 @@ import (
 
 const version = "1.0.0"
 
+//	@title			Psocial API
+//	@version		1.0
+//	@description	API documentation for Psocial API.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@BasePath	/v1
+
+//	@securityDefinitions.basic	ApiKeyAuth
+
+//	@externalDocs.description	OpenAPI
+//	@externalDocs.url			https://swagger.io/resources/open-api/
+
 func main() {
 	godotenv.Load(".env")
 
 	cfg := config{
-		addr: fmt.Sprintf(":%s", env.GetEnv("PORT", "8080")),
-		env:  env.GetEnv("ENV", "development"),
+		addr:   fmt.Sprintf(":%s", env.GetEnv("PORT", "8080")),
+		apiURL: env.GetEnv("API_URL", "localhost:8080"),
+		env:    env.GetEnv("ENV", "development"),
 		db: dbConfig{
 			addr:         env.GetEnv("DB_ADDR", "postgres://postgres:postgres@localhost:5432/psocial?sslmode=disable"),
 			maxOpenConns: env.GetEnvAsInt("DB_MAX_OPEN_CONNS", 30),
