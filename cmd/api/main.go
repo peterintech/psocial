@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/peterintech/psocial/internal/db"
@@ -37,12 +38,15 @@ func main() {
 	cfg := config{
 		addr:   fmt.Sprintf(":%s", env.GetEnv("PORT", "8080")),
 		apiURL: env.GetEnv("API_URL", "localhost:8080"),
-		env:    env.GetEnv("ENV", "development"),
 		db: dbConfig{
 			addr:         env.GetEnv("DB_ADDR", "postgres://postgres:postgres@localhost:5432/psocial?sslmode=disable"),
 			maxOpenConns: env.GetEnvAsInt("DB_MAX_OPEN_CONNS", 30),
 			maxIdleConns: env.GetEnvAsInt("DB_MAX_IDLE_CONNS", 30),
 			maxIdleTime:  env.GetEnv("DB_MAX_IDLE_TIME", "15m"),
+		},
+		env: env.GetEnv("ENV", "development"),
+		mail: mailConfig{
+			exp: time.Hour * 24 * 3, // 3 days
 		},
 	}
 

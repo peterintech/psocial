@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/peterintech/psocial/internal/store"
 )
 
@@ -48,11 +51,23 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	plainToken := uuid.New().String()
+	// hash and store the token
+	hash := sha256.Sum256([]byte(plainToken))
+	hashedToken := hex.EncodeToString(hash[:])
+
 	// store the user in the database
-	if err := app.store.Users.CreateAndInvite(r.Context(), user, "uuidv4"); err != nil {
-		app.internalServerError(w, r, err)
+	if err := app.store.Users.CreateAndInvite(r.Context(), user, hashedToken, app.config.mail.exp); err != nil {
+		switch err {
+		case store.ErrDuplicateEmail, store.ErrDuplicateUsername:
+			app.badRequestError(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+		}
 		return
 	}
+
+	//send mail
 
 	if err := app.jsonResponse(w, http.StatusCreated, nil); err != nil {
 		app.internalServerError(w, r, err)
