@@ -76,6 +76,9 @@ func (app *application) mount() *chi.Mux {
 				r.Get("/feed", app.getFeedHandler)
 			})
 		})
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/register", app.registerUserHandler)
+		})
 	})
 
 	return r
