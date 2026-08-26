@@ -1,18 +1,5 @@
 basePath: /v1
 definitions:
-  cmd_api.UpdatePostPayload:
-    properties:
-      content:
-        maxLength: 1000
-        type: string
-      tags:
-        items:
-          type: string
-        type: array
-      title:
-        maxLength: 100
-        type: string
-    type: object
   main.CreateCommentPayload:
     properties:
       content:
@@ -42,6 +29,19 @@ definitions:
         type: string
     required:
     - user_id
+    type: object
+  main.UpdatePostPayload:
+    properties:
+      content:
+        maxLength: 1000
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        maxLength: 100
+        type: string
     type: object
   store.Comment:
     properties:
@@ -265,7 +265,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/cmd_api.UpdatePostPayload'
+          $ref: '#/definitions/main.UpdatePostPayload'
       produces:
       - application/json
       responses:
