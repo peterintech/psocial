@@ -51,6 +51,27 @@ func (app *application) mount() *chi.Mux {
 		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))
 
+		// Public routes
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/register", app.registerUserHandler)
+		})
+
+		r.Route("/users", func(r chi.Router) {
+			r.Put("/activate/{token}", app.activateUserHandler)
+
+			r.Route("/{userID}", func(r chi.Router) {
+				r.Use(app.userContextMiddleware)
+
+				r.Get("/", app.getUserHandler)
+				r.Put("/follow", app.followUserHandler)
+				r.Put("/unfollow", app.unfollowUserHandler)
+			})
+
+			r.Group(func(r chi.Router) {
+				r.Get("/feed", app.getFeedHandler)
+			})
+		})
+
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", app.createPostHandler)
 
@@ -66,24 +87,7 @@ func (app *application) mount() *chi.Mux {
 				})
 			})
 		})
-		r.Route("/users", func(r chi.Router) {
-			// r.Post("/", app.createUserHandler)
 
-			r.Route("/{userID}", func(r chi.Router) {
-				r.Use(app.userContextMiddleware)
-
-				r.Get("/", app.getUserHandler)
-				r.Put("/follow", app.followUserHandler)
-				r.Put("/unfollow", app.unfollowUserHandler)
-			})
-
-			r.Group(func(r chi.Router) {
-				r.Get("/feed", app.getFeedHandler)
-			})
-		})
-		r.Route("/auth", func(r chi.Router) {
-			r.Post("/register", app.registerUserHandler)
-		})
 	})
 
 	return r

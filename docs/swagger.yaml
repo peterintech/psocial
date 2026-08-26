@@ -61,6 +61,13 @@ definitions:
         maxLength: 100
         type: string
     type: object
+  main.UserWithToken:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/store.User'
+    type: object
   store.Comment:
     properties:
       content:
@@ -140,6 +147,8 @@ definitions:
         type: string
       id:
         type: string
+      is_active:
+        type: boolean
       username:
         type: string
     type: object
@@ -159,6 +168,40 @@ info:
   title: Psocial API
   version: "1.0"
 paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with username, email, and password
+      parameters:
+      - description: User registration payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/main.RegisterUserPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/main.UserWithToken'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
   /health:
     get:
       consumes:
@@ -440,6 +483,34 @@ paths:
       summary: Unfollow a user
       tags:
       - users
+  /users/activate/{token}:
+    put:
+      consumes:
+      - application/json
+      description: Activates a user account using an activation token
+      parameters:
+      - description: Activation Token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Activate a user account
+      tags:
+      - users
   /users/feed:
     get:
       consumes:
@@ -490,42 +561,6 @@ paths:
       summary: Get user feed
       tags:
       - feed
-  /v1/auth/register:
-    post:
-      consumes:
-      - application/json
-      description: Register a new user with username, email, and password
-      parameters:
-      - description: User registration payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/main.RegisterUserPayload'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User registered successfully
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Register a new user
-      tags:
-      - auth
 securityDefinitions:
   ApiKeyAuth:
     type: basic
