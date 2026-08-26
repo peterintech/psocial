@@ -22,11 +22,12 @@ func (app *application) getFeedHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := Validate.Struct(fq); err != nil {
 		app.badRequestError(w, r, err)
+		return
 	}
 
 	ctx := r.Context()
 
-	feed, err := app.store.Posts.GetUserFeeds(ctx, "23", fq)
+	feed, err := app.store.Posts.GetUserFeeds(ctx, "35", fq)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
