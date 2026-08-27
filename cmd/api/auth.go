@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/peterintech/psocial/internal/mailer"
 	"github.com/peterintech/psocial/internal/store"
 )
 
@@ -77,7 +78,29 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Token: plainToken,
 	}
 
+	activationURL := app.config.frontendURL + "/auth/activate?token=" + plainToken
+	isProduction := app.config.env == "production"
+
+	vars := struct {
+		Username      string
+		ActivationURL string
+	}{
+		Username:      user.Username,
+		ActivationURL: activationURL,
+	}
 	//send mail
+	err := app.mailer.Send(mailer.UserWelcomeTemplate, user.Username, user.Email, vars, !isProduction)
+	if err != nil {
+		app.logger.Errorw("failed to send welcome email", "error", err, "userID", user.ID)
+
+		// rollback the user creation by deleting the user from the database (SAGA pattern)
+		if err := app.store.Users.Delete(r.Context(), user.ID); err != nil {
+			app.logger.Errorw("failed to rollback user creation", "error", err, "userID", user.ID)
+		}
+
+		app.internalServerError(w, r, err)
+		return
+	}
 
 	if err := app.jsonResponse(w, http.StatusCreated, userWithToken); err != nil {
 		app.internalServerError(w, r, err)

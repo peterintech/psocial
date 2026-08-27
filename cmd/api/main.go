@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/peterintech/psocial/internal/db"
 	"github.com/peterintech/psocial/internal/env"
+	"github.com/peterintech/psocial/internal/mailer"
 	"github.com/peterintech/psocial/internal/store"
 	"go.uber.org/zap"
 )
@@ -36,8 +37,9 @@ func main() {
 	godotenv.Load(".env")
 
 	cfg := config{
-		addr:   fmt.Sprintf(":%s", env.GetEnv("PORT", "8080")),
-		apiURL: env.GetEnv("API_URL", "localhost:8080"),
+		addr:        fmt.Sprintf(":%s", env.GetEnv("PORT", "8080")),
+		apiURL:      env.GetEnv("API_URL", "localhost:8080"),
+		frontendURL: env.GetEnv("FRONTEND_URL", "http://localhost:3000"),
 		db: dbConfig{
 			addr:         env.GetEnv("DB_ADDR", "postgres://postgres:postgres@localhost:5432/psocial?sslmode=disable"),
 			maxOpenConns: env.GetEnvAsInt("DB_MAX_OPEN_CONNS", 30),
@@ -46,7 +48,11 @@ func main() {
 		},
 		env: env.GetEnv("ENV", "development"),
 		mail: mailConfig{
-			exp: time.Hour * 24 * 3, // 3 days
+			exp:       time.Hour * 24 * 3, // 3 days
+			fromEmail: env.GetEnv("MAIL_FROM_EMAIL", "noreply@psocial.com"),
+			sendGrid: sendGridConfig{
+				apiKey: env.GetEnv("SENDGRID_API_KEY", ""),
+			},
 		},
 	}
 
@@ -66,10 +72,13 @@ func main() {
 
 	store := store.NewStorage(db)
 
+	mailer := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGrid.apiKey)
+
 	app := &application{
 		config: cfg,
 		store:  store,
 		logger: logger,
+		mailer: mailer,
 	}
 
 	mux := app.mount()
