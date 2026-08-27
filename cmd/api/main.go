@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/peterintech/psocial/internal/auth"
 	"github.com/peterintech/psocial/internal/db"
 	"github.com/peterintech/psocial/internal/env"
 	"github.com/peterintech/psocial/internal/mailer"
@@ -54,6 +55,17 @@ func main() {
 				apiKey: env.GetEnv("SENDGRID_API_KEY", ""),
 			},
 		},
+		auth: authConfig{
+			basic: basicAuthConfig{
+				user: env.GetEnv("BASIC_AUTH_USER", "admin"),
+				pass: env.GetEnv("BASIC_AUTH_PASS", "password"),
+			},
+			token: tokenAuthConfig{
+				secret: env.GetEnv("JWT_SECRET", "mysecretkey"),
+				exp:    time.Hour * 24 * 3, // 3 days
+				iss:    "psocial",
+			},
+		},
 	}
 
 	// Logger
@@ -74,11 +86,14 @@ func main() {
 
 	mailer := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGrid.apiKey)
 
+	jwtAuthenticator := auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.iss, cfg.auth.token.iss) // 24 hours
+
 	app := &application{
-		config: cfg,
-		store:  store,
-		logger: logger,
-		mailer: mailer,
+		config:        cfg,
+		store:         store,
+		logger:        logger,
+		mailer:        mailer,
+		authenticator: jwtAuthenticator,
 	}
 
 	mux := app.mount()

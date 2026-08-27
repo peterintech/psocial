@@ -23,6 +23,16 @@ definitions:
     - content
     - title
     type: object
+  main.CreateTokenPayload:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
   main.FollowUser:
     properties:
       user_id:
@@ -200,6 +210,48 @@ paths:
               type: string
             type: object
       summary: Register a new user
+      tags:
+      - auth
+  /auth/token:
+    post:
+      consumes:
+      - application/json
+      description: Create a new token for user authentication using email and password
+      parameters:
+      - description: User login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreateTokenPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token created successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new token for user authentication
       tags:
       - auth
   /health:
