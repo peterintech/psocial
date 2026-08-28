@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func newTestApplication(t *testing.T) *application {
+func newTestApplication(t *testing.T, cfg config) *application {
 	t.Helper()
 
 	logger := zap.NewNop().Sugar()
@@ -22,12 +22,8 @@ func newTestApplication(t *testing.T) *application {
 	testAuth := &auth.TestAuthenticator{}
 
 	app := &application{
-		logger: logger,
-		config: config{
-			redisCfg: redisConfig{
-				enabled: false,
-			},
-		},
+		logger:        logger,
+		config:        cfg,
 		store:         mockStore,
 		cacheStorage:  mockCacheStore,
 		authenticator: testAuth,

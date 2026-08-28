@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/peterintech/psocial/internal/store"
+	"github.com/stretchr/testify/mock"
 )
 
 func NewMockStore() Storage {
@@ -13,24 +14,15 @@ func NewMockStore() Storage {
 }
 
 type MockUserStore struct {
-	users map[string]*store.User
+	mock.Mock
 }
 
 func (s *MockUserStore) GetByID(ctx context.Context, userID string) (*store.User, error) {
-	if s.users == nil {
-		s.users = make(map[string]*store.User)
-	}
-	user, exists := s.users[userID]
-	if !exists {
-		return nil, nil
-	}
-	return user, nil
+	args := s.Called(userID)
+	return nil, args.Error(1)
 }
 
 func (s *MockUserStore) Set(ctx context.Context, user *store.User) error {
-	if s.users == nil {
-		s.users = make(map[string]*store.User)
-	}
-	s.users[user.ID] = user
-	return nil
+	args := s.Called(user)
+	return args.Error(0)
 }
