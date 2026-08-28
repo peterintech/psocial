@@ -131,8 +131,6 @@ type CreateTokenPayload struct {
 //	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Router			/auth/token [post]
 func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Request) {
-	// parse payload credentials
-	// fetch the user (check if the user exists) from the payload
 	// send it to the client
 
 	var payload CreateTokenPayload
@@ -147,6 +145,7 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// fetch the user (check if the user exists) from the payload
 	user, err := app.store.Users.GetByEmail(r.Context(), payload.Email)
 	if err != nil {
 		switch err {
