@@ -8,6 +8,12 @@ import (
 func TestGetUser(t *testing.T) {
 	app := newTestApplication(t)
 	mux := app.mount()
+
+	testToken, err := app.authenticator.GenerateToken(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Run("should not allow unauthenticated requests", func(t *testing.T) {
 		//check for 401
 		req, err := http.NewRequest(http.MethodGet, "/v1/users/1", nil)
@@ -16,10 +22,21 @@ func TestGetUser(t *testing.T) {
 		}
 		rr := executeRequest(req, mux)
 
-		if status := rr.Code; status != http.StatusUnauthorized {
-			t.Errorf("handler returned wrong status code: got %v want %v",
-				status, http.StatusUnauthorized)
+		checkResponseCode(t, http.StatusUnauthorized, rr.Code)
+
+	})
+
+	t.Run("should allow authenticated reqs", func(t *testing.T) {
+		//check for 200
+		req, err := http.NewRequest(http.MethodGet, "/v1/users/1", nil)
+		if err != nil {
+			t.Fatal(err)
 		}
 
+		req.Header.Set("Authorization", "Bearer "+testToken)
+
+		rr := executeRequest(req, mux)
+
+		checkResponseCode(t, http.StatusOK, rr.Code)
 	})
 }

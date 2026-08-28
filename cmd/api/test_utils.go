@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/peterintech/psocial/internal/auth"
 	"github.com/peterintech/psocial/internal/store"
 	"github.com/peterintech/psocial/internal/store/cache"
 	"go.uber.org/zap"
@@ -18,6 +19,8 @@ func newTestApplication(t *testing.T) *application {
 	mockStore := store.NewMockStore()
 	mockCacheStore := cache.NewMockStore()
 
+	testAuth := &auth.TestAuthenticator{}
+
 	app := &application{
 		logger: logger,
 		config: config{
@@ -25,8 +28,9 @@ func newTestApplication(t *testing.T) *application {
 				enabled: false,
 			},
 		},
-		store:        mockStore,
-		cacheStorage: mockCacheStore,
+		store:         mockStore,
+		cacheStorage:  mockCacheStore,
+		authenticator: testAuth,
 	}
 
 	return app
@@ -36,4 +40,10 @@ func executeRequest(req *http.Request, mux *chi.Mux) *httptest.ResponseRecorder 
 	rr := httptest.NewRecorder()
 	mux.ServeHTTP(rr, req)
 	return rr
+}
+
+func checkResponseCode(t *testing.T, expected, actual int) {
+	if expected != actual {
+		t.Errorf("Expected response code %d. Got %d\n", expected, actual)
+	}
 }
