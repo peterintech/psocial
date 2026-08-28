@@ -27,7 +27,24 @@ const userContextKey userKey = "user"
 //	@Security		ApiKeyAuth
 //	@Router			/users/{userID} [get]
 func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
-	user := app.getUserFromContext(r)
+	userID := chi.URLParam(r, "userID")
+
+	if userID == "" {
+		app.badRequestError(w, r, errors.New("userID is required"))
+		return
+	}
+
+	user, err := app.getUser(r.Context(), userID)
+	if err != nil {
+		switch err {
+		case store.ErrNotFound:
+			app.notFoundError(w, r, err)
+			return
+		default:
+			app.internalServerError(w, r, err)
+			return
+		}
+	}
 
 	if err := app.jsonResponse(w, http.StatusOK, user); err != nil {
 		app.internalServerError(w, r, err)

@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -163,6 +164,7 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 
 	// verify password
 	if err := user.Password.Compare(payload.Password); err != nil {
+		log.Print("pass err: ", err)
 		app.unauthorizedError(w, r, fmt.Errorf("Invalid Password"))
 		return
 	}

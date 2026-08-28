@@ -36,7 +36,7 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 
 		userID := fmt.Sprintf("%v", claims["sub"])
 
-		user, err := app.store.Users.GetByID(r.Context(), userID)
+		user, err := app.getUser(r.Context(), userID)
 		if err != nil {
 			app.unauthorizedError(w, r, fmt.Errorf("user not found"))
 			return
@@ -121,4 +121,31 @@ func (app *application) checkRolePrecedence(ctx context.Context, user *store.Use
 		return false, err
 	}
 	return user.Role.Level >= role.Level, nil
+}
+
+func (app *application) getUser(ctx context.Context, userID string) (*store.User, error) {
+	if !app.config.redisCfg.enabled {
+		fmt.Println("-- redis is disabled --")
+		return app.store.Users.GetByID(ctx, userID)
+	}
+
+	user, err := app.cacheStorage.Users.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		user, err = app.store.Users.GetByID(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		if err := app.cacheStorage.Users.Set(ctx, user); err != nil {
+			return nil, err
+		}
+	} else {
+		fmt.Println("-- redis has the user --")
+
+	}
+
+	return user, nil
 }
