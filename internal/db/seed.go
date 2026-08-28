@@ -166,10 +166,14 @@ func generateComments(posts []*store.Post, n int) []*store.Comment {
 
 func generateUsers(n int) []*store.User {
 	users := make([]*store.User, n)
+
 	for i := range n {
 		users[i] = &store.User{
 			Username: usernames[rand.Intn(len(usernames))] + fmt.Sprintf("%d", i),
 			Email:    usernames[rand.Intn(len(usernames))] + fmt.Sprintf("%d", i) + "@example.com",
+			Role: &store.Role{
+				Name: "user",
+			},
 		}
 	}
 	return users

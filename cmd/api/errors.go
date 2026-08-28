@@ -9,6 +9,11 @@ func (app *application) internalServerError(w http.ResponseWriter, r *http.Reque
 
 	writeErrorJSON(w, http.StatusInternalServerError, err.Error())
 }
+func (app *application) forbiddenError(w http.ResponseWriter, r *http.Request) {
+	app.logger.Errorw("forbidden", "method", r.Method, "path", r.URL.Path, "error", "forbidden")
+
+	writeErrorJSON(w, http.StatusForbidden, "forbidden")
+}
 
 func (app *application) badRequestError(w http.ResponseWriter, r *http.Request, err error) {
 	app.logger.Warnw("bad request error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
