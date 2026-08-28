@@ -61,8 +61,8 @@ func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 
 func (s *UserStore) GetByID(ctx context.Context, userID string) (*User, error) {
 	user := &User{}
-	query := `SELECT id, username, email, created_at FROM users WHERE id = $1`
-	err := s.db.QueryRowContext(ctx, query, userID).Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt)
+	query := `SELECT id, username, password, email, created_at FROM users WHERE id = $1`
+	err := s.db.QueryRowContext(ctx, query, userID).Scan(&user.ID, &user.Username, &user.Password.hash, &user.Email, &user.CreatedAt)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

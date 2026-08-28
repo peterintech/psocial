@@ -165,6 +165,11 @@
         },
         "/posts": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new post with title, content, and optional tags",
                 "consumes": [
                     "application/json"
@@ -207,6 +212,11 @@
         },
         "/posts/{postID}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Fetches a post by ID with its comments",
                 "consumes": [
                     "application/json"
@@ -249,6 +259,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes a post by ID",
                 "consumes": [
                     "application/json"
@@ -294,6 +309,11 @@
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Partially updates a post's title, content, and/or tags",
                 "consumes": [
                     "application/json"
@@ -441,6 +461,11 @@
         },
         "/users/feed": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Fetches paginated posts from followed users and own posts",
                 "consumes": [
                     "application/json"
@@ -514,6 +539,11 @@
         },
         "/users/{userID}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Fetches a user profile by ID",
                 "consumes": [
                     "application/json"
@@ -558,6 +588,11 @@
         },
         "/users/{userID}/follow": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Follows a user by ID",
                 "consumes": [
                     "application/json"
@@ -612,6 +647,11 @@
         },
         "/users/{userID}/unfollow": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Unfollows a user by ID",
                 "consumes": [
                     "application/json"
@@ -907,7 +947,9 @@
     },
     "securityDefinitions": {
         "ApiKeyAuth": {
-            "type": "basic"
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
     "externalDocs": {

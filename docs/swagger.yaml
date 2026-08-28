@@ -299,6 +299,8 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Create a post
       tags:
       - posts
@@ -331,6 +333,8 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Delete a post
       tags:
       - posts
@@ -360,6 +364,8 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Get a post
       tags:
       - posts
@@ -395,6 +401,8 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Update a post
       tags:
       - posts
@@ -461,6 +469,8 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Fetches a user profile
       tags:
       - users
@@ -498,6 +508,8 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Follow a user
       tags:
       - users
@@ -532,6 +544,8 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Unfollow a user
       tags:
       - users
@@ -610,10 +624,14 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
+      security:
+      - ApiKeyAuth: []
       summary: Get user feed
       tags:
       - feed
 securityDefinitions:
   ApiKeyAuth:
-    type: basic
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

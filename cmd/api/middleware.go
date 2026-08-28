@@ -1,11 +1,51 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
 )
+
+func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			app.unauthorizedError(w, r, fmt.Errorf("missing authorization header"))
+			return
+		}
+
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			app.unauthorizedError(w, r, fmt.Errorf("invalid authorization header format"))
+			return
+		}
+
+		tokenString := parts[1]
+		jwtToken, err := app.authenticator.ValidateToken(tokenString)
+		if err != nil {
+			app.unauthorizedError(w, r, err)
+			return
+		}
+
+		claims, _ := jwtToken.Claims.(jwt.MapClaims)
+
+		userID := fmt.Sprintf("%v", claims["sub"])
+
+		user, err := app.store.Users.GetByID(r.Context(), userID)
+		if err != nil {
+			app.unauthorizedError(w, r, fmt.Errorf("user not found"))
+			return
+		}
+
+		// Add the user
+		ctx := context.WithValue(r.Context(), userContextKey, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
 
 func (app *application) BasicAuthMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

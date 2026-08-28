@@ -25,6 +25,7 @@ const userContextKey userKey = "user"
 //	@Failure		400		{object}	error
 //	@Failure		404		{object}	error
 //	@Failure		500		{object}	error
+//	@Security		ApiKeyAuth
 //	@Router			/users/{userID} [get]
 func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := app.getUserFromContext(r)
@@ -53,6 +54,7 @@ type FollowUser struct {
 //	@Failure		404	{object}	error
 //	@Failure		409	{object}	error
 //	@Failure		500	{object}	error
+//	@Security		ApiKeyAuth
 //	@Router			/users/{userID}/follow [put]
 func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
 	followerUser := app.getUserFromContext(r)
@@ -101,6 +103,7 @@ func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request
 //	@Failure		400	{object}	error
 //	@Failure		404	{object}	error
 //	@Failure		500	{object}	error
+//	@Security		ApiKeyAuth
 //	@Router			/users/{userID}/unfollow [put]
 func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	unFollowedUser := app.getUserFromContext(r)

@@ -172,6 +172,11 @@ const docTemplate = `{
         },
         "/posts": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new post with title, content, and optional tags",
                 "consumes": [
                     "application/json"
@@ -214,6 +219,11 @@ const docTemplate = `{
         },
         "/posts/{postID}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Fetches a post by ID with its comments",
                 "consumes": [
                     "application/json"
@@ -256,6 +266,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes a post by ID",
                 "consumes": [
                     "application/json"
@@ -301,6 +316,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Partially updates a post's title, content, and/or tags",
                 "consumes": [
                     "application/json"
@@ -448,6 +468,11 @@ const docTemplate = `{
         },
         "/users/feed": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Fetches paginated posts from followed users and own posts",
                 "consumes": [
                     "application/json"
@@ -521,6 +546,11 @@ const docTemplate = `{
         },
         "/users/{userID}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Fetches a user profile by ID",
                 "consumes": [
                     "application/json"
@@ -565,6 +595,11 @@ const docTemplate = `{
         },
         "/users/{userID}/follow": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Follows a user by ID",
                 "consumes": [
                     "application/json"
@@ -619,6 +654,11 @@ const docTemplate = `{
         },
         "/users/{userID}/unfollow": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Unfollows a user by ID",
                 "consumes": [
                     "application/json"
@@ -914,7 +954,9 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "ApiKeyAuth": {
-            "type": "basic"
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
     "externalDocs": {
