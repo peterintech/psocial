@@ -1,7 +1,9 @@
 package main
 
 import (
+	"expvar"
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -125,6 +127,21 @@ func main() {
 		authenticator: jwtAuthenticator,
 		rateLimiter:   rateLimiter,
 	}
+
+	//metrics collected
+	expvar.NewString("version").Set(version)
+	expvar.Publish("database", expvar.Func(func() any {
+		return db.Stats()
+	}))
+	expvar.Publish("goroutines", expvar.Func(func() any {
+		return runtime.NumGoroutine()
+	}))
+	expvar.Publish("redis", expvar.Func(func() any {
+		if cfg.redisCfg.enabled {
+			return rdb.PoolStats()
+		}
+		return nil
+	}))
 
 	mux := app.mount()
 	logger.Fatal(app.run(mux))
