@@ -104,29 +104,52 @@ var contents = []string{
 func Seed(store store.Storage, db *sql.DB) error {
 	ctx := context.Background()
 
-	users := generateUsers(100)
-	tx, _ := db.BeginTx(ctx, nil)
+	if _, err := db.ExecContext(ctx, `DELETE FROM users WHERE email LIKE '%@example.com'`); err != nil {
+		return fmt.Errorf("failed to clean previous seed data: %w", err)
+	}
 
-	for _, user := range users {
+	users, err := generateUsers(100)
+	if err != nil {
+		return fmt.Errorf("failed to generate users: %w", err)
+	}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	for i, user := range users {
 		if err := store.Users.Create(ctx, tx, user); err != nil {
 			_ = tx.Rollback()
 			return fmt.Errorf("failed to create user: %w", err)
 		}
-	}
-
-	tx.Commit()
-
-	posts := generatePosts(users, 200)
-	for _, post := range posts {
-		if err := store.Posts.Create(ctx, post); err != nil {
-			return fmt.Errorf("failed to create post: %w", err)
+		if i%20 == 19 {
+			log.Printf("users: %d/100", i+1)
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit users transaction: %w", err)
+	}
+	log.Println("users committed")
+
+	posts := generatePosts(users, 200)
+	for i, post := range posts {
+		if err := store.Posts.Create(ctx, post); err != nil {
+			return fmt.Errorf("failed to create post: %w", err)
+		}
+		if i%50 == 49 {
+			log.Printf("posts: %d/200", i+1)
+		}
+	}
+	log.Println("posts created")
+
 	comments := generateComments(posts, 500)
-	for _, comment := range comments {
+	for i, comment := range comments {
 		if err := store.Comments.Create(ctx, comment); err != nil {
 			return fmt.Errorf("failed to create comment: %w", err)
+		}
+		if i%100 == 99 {
+			log.Printf("comments: %d/500", i+1)
 		}
 	}
 
@@ -164,7 +187,7 @@ func generateComments(posts []*store.Post, n int) []*store.Comment {
 	return comments
 }
 
-func generateUsers(n int) []*store.User {
+func generateUsers(n int) ([]*store.User, error) {
 	users := make([]*store.User, n)
 
 	for i := range n {
@@ -175,6 +198,9 @@ func generateUsers(n int) []*store.User {
 				Name: "user",
 			},
 		}
+		if err := users[i].Password.Set("password"); err != nil {
+			return nil, err
+		}
 	}
-	return users
+	return users, nil
 }

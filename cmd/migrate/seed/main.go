@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/joho/godotenv"
 	"github.com/peterintech/psocial/internal/db"
 	"github.com/peterintech/psocial/internal/env"
@@ -20,5 +22,8 @@ func main() {
 
 	store := store.NewStorage(conn)
 
-	db.Seed(store, conn)
+	if err := db.Seed(store, conn); err != nil {
+		panic(err)
+	}
+	log.Println("Database seeding completed successfully.")
 }
