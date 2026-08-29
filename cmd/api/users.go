@@ -169,33 +169,6 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// func (app *application) userContextMiddleware(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		userID := chi.URLParam(r, "userID")
-// 		if userID == "" {
-// 			app.badRequestError(w, r, errors.New("userID is required"))
-// 			return
-// 		}
-
-// 		ctx := r.Context()
-// 		user, err := app.store.Users.GetByID(ctx, userID)
-// 		if err != nil {
-// 			switch err {
-// 			case store.ErrNotFound:
-// 				app.notFoundError(w, r, err)
-// 				return
-// 			default:
-// 				app.internalServerError(w, r, err)
-// 				return
-// 			}
-// 		}
-
-// 		ctx = context.WithValue(r.Context(), userContextKey, user)
-
-// 		next.ServeHTTP(w, r.WithContext(ctx))
-// 	})
-// }
-
 func (app *application) getUserFromContext(r *http.Request) *store.User {
 	user := r.Context().Value(userContextKey)
 	if user == nil {
