@@ -48,3 +48,11 @@ func (app *application) unauthorizedBasicError(w http.ResponseWriter, r *http.Re
 
 	writeErrorJSON(w, http.StatusUnauthorized, err.Error())
 }
+
+func (app *application) tooManyRequestsError(w http.ResponseWriter, r *http.Request, retryAfter string) {
+	app.logger.Warnw("too many requests error", "method", r.Method, "path", r.URL.Path, "error", "too many requests")
+
+	w.Header().Set("Retry-After", retryAfter)
+
+	writeErrorJSON(w, http.StatusTooManyRequests, "too many requests, retry after "+retryAfter)
+}

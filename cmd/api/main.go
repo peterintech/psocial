@@ -10,6 +10,7 @@ import (
 	"github.com/peterintech/psocial/internal/db"
 	"github.com/peterintech/psocial/internal/env"
 	"github.com/peterintech/psocial/internal/mailer"
+	"github.com/peterintech/psocial/internal/ratelimiter"
 	"github.com/peterintech/psocial/internal/store"
 	"github.com/peterintech/psocial/internal/store/cache"
 	"go.uber.org/zap"
@@ -76,6 +77,11 @@ func main() {
 				iss:    "psocial",
 			},
 		},
+		rateLimiter: ratelimiter.Config{
+			RequestsPerTimeFrame: env.GetEnvAsInt("RATE_LIMIT_REQUESTS_COUNT", 20),
+			TimeFrame:            time.Second * 5,
+			Enabled:              env.GetEnvAsBool("RATE_LIMIT_ENABLED", true),
+		},
 	}
 
 	// Logger
@@ -97,10 +103,14 @@ func main() {
 	if cfg.redisCfg.enabled {
 		rdb = cache.NewRedisClient(cfg.redisCfg.addr, cfg.redisCfg.password, cfg.redisCfg.db)
 		defer rdb.Close()
+
 		logger.Info("redis cache connection established")
 	}
+
 	cacheStorage := cache.NewRedisStorage(rdb)
 	store := store.NewStorage(db)
+
+	rateLimiter := ratelimiter.NewFixedWindowRateLimiter(cfg.rateLimiter.RequestsPerTimeFrame, cfg.rateLimiter.TimeFrame)
 
 	mailer := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGrid.apiKey)
 
@@ -113,6 +123,7 @@ func main() {
 		logger:        logger,
 		mailer:        mailer,
 		authenticator: jwtAuthenticator,
+		rateLimiter:   rateLimiter,
 	}
 
 	mux := app.mount()

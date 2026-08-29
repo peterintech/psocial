@@ -16,6 +16,7 @@ import (
 	"github.com/peterintech/psocial/docs"
 	"github.com/peterintech/psocial/internal/auth"
 	"github.com/peterintech/psocial/internal/mailer"
+	"github.com/peterintech/psocial/internal/ratelimiter"
 	"github.com/peterintech/psocial/internal/store"
 	"github.com/peterintech/psocial/internal/store/cache"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
@@ -29,6 +30,7 @@ type application struct {
 	logger        *zap.SugaredLogger
 	mailer        mailer.Client
 	authenticator auth.Authenticator
+	rateLimiter   ratelimiter.Limiter
 }
 
 type config struct {
@@ -40,6 +42,7 @@ type config struct {
 	frontendURL string
 	auth        authConfig
 	redisCfg    redisConfig
+	rateLimiter ratelimiter.Config
 }
 
 type redisConfig struct {
@@ -97,9 +100,12 @@ func (app *application) mount() *chi.Mux {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
+	r.Use(middleware.ClientIPFromRemoteAddr)
+	r.Use(app.RateLimiterMiddleware)
 
 	r.Route("/v1", func(r chi.Router) {
-		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		// r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		r.Get("/health", app.healthCheckHandler)
 
 		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))
