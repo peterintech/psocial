@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/peterintech/psocial/compare/v1.1.0...v1.2.0) (2026-08-29)
+
+
+### Features
+
+* dockerfile ([b34965f](https://github.com/peterintech/psocial/commit/b34965f7799ce0563871cf7e72b510c7c5b4da3e))
+
 ## [1.1.0](https://github.com/peterintech/psocial/compare/v1.0.0...v1.1.0) (2026-08-29)
 
 
