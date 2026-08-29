@@ -15,6 +15,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/peterintech/psocial/docs"
 	"github.com/peterintech/psocial/internal/auth"
+	"github.com/peterintech/psocial/internal/env"
 	"github.com/peterintech/psocial/internal/mailer"
 	"github.com/peterintech/psocial/internal/ratelimiter"
 	"github.com/peterintech/psocial/internal/store"
@@ -88,19 +89,18 @@ type dbConfig struct {
 func (app *application) mount() *chi.Mux {
 	r := chi.NewRouter()
 
+	r.Use(middleware.RequestID)
+	r.Use(middleware.ClientIPFromRemoteAddr)
+	r.Use(middleware.Recoverer)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedOrigins:   []string{env.GetEnv("CORS_ALLOWED_ORIGIN", "http://localhost:5174")},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
-	r.Use(middleware.ClientIPFromRemoteAddr)
 	r.Use(app.RateLimiterMiddleware)
 
 	r.Route("/v1", func(r chi.Router) {
