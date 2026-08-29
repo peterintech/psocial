@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/peterintech/psocial/compare/v1.0.0...v1.1.0) (2026-08-29)
+
+
+### Features
+
+* update api version automatically ([7255d96](https://github.com/peterintech/psocial/commit/7255d96902c3a9ac56dbabd79885ca41ca53f1e8))
+
 ## 1.0.0 (2026-08-29)
 
 
