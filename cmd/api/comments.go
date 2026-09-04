@@ -41,11 +41,12 @@ func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Requ
 		app.internalServerError(w, r, err)
 		return
 	}
+	user := app.getUserFromContext(r)
 
 	comment := &store.Comment{
 		Content: payload.Content,
 		PostID:  post.ID,
-		UserID:  post.UserID,
+		UserID:  user.ID,
 	}
 
 	if err := app.store.Comments.Create(r.Context(), comment); err != nil {
