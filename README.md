@@ -94,7 +94,7 @@ Email is different: an SMTP provider cannot participate in the PostgreSQL transa
 
 The application depends on a `mailer.Client`, not directly on SendGrid or SMTP. When SendGrid became unreliable during development, I added a standard-library SMTP implementation and selected the provider through `MAIL_PROVIDER`; the registration workflow stayed independent of the vendor.
 
-The same pattern is used for storage, cache, token authentication, and rate limiting. This is dependency inversion in practical terms: core workflows ask for capabilities, and startup code supplies concrete adapters.
+The same pattern is used for storage, cache, token authentication, and rate limiting. This is dependency injection in practical terms: core workflows ask for capabilities, and startup code supplies concrete adapters.
 
 That separation also keeps tests fast. Delivery failures, rollback behavior, provider selection, template rendering, retries, and SMTP message construction can be tested without contacting Gmail.
 
@@ -337,6 +337,6 @@ This is an influence rather than a claim of perfect compliance. The current in-m
 
 ## Why this repository exists
 
-I wanted a project where design decisions could be tested rather than merely named. Psocial gave me concrete reasons to use transactions, compensation, optimistic locking, dependency inversion, indexes, caching, authorization policy, observability, and graceful lifecycle management.
+I wanted a project where design decisions could be tested rather than merely named. Psocial gave me concrete reasons to use transactions, compensation, optimistic locking, dependency injection, indexes, caching, authorization policy, observability, and graceful lifecycle management.
 
 The result is intentionally small enough to understand and realistic enough to fail in interesting ways—the kind of failures backend engineers are expected to anticipate.
