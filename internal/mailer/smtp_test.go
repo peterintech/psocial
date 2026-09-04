@@ -93,6 +93,33 @@ func TestSMTPMailerSendBuildsHTMLMessage(t *testing.T) {
 			t.Errorf("message did not contain %q", value)
 		}
 	}
+
+	bodySeparator := strings.Index(gotMessage, "\r\n\r\n")
+	if bodySeparator == -1 {
+		t.Fatal("message did not contain an SMTP header/body separator")
+	}
+	body := gotMessage[bodySeparator+4:]
+	if strings.Contains(strings.ReplaceAll(body, "\r\n", ""), "\n") {
+		t.Error("message body contained a bare LF instead of SMTP CRLF line endings")
+	}
+}
+
+func TestNormalizeSMTPBodyUsesCRLF(t *testing.T) {
+	tests := map[string]string{
+		"LF":    "\n<!doctype html>\n<body>hello</body>\n",
+		"CRLF":  "\r\n<!doctype html>\r\n<body>hello</body>\r\n",
+		"CR":    "\r<!doctype html>\r<body>hello</body>\r",
+		"mixed": "\r\n<!doctype html>\n<body>hello</body>\r",
+	}
+	want := "<!doctype html>\r\n<body>hello</body>\r\n"
+
+	for name, input := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got := normalizeSMTPBody(input); got != want {
+				t.Fatalf("normalizeSMTPBody() = %q, want %q", got, want)
+			}
+		})
+	}
 }
 
 func TestSMTPMailerSendRetries(t *testing.T) {

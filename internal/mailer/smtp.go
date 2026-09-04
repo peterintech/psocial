@@ -121,9 +121,16 @@ func (s *SMTPMailer) buildMessage(username, email string, rendered renderedMessa
 	message.WriteString("MIME-Version: 1.0\r\n")
 	message.WriteString("Content-Type: text/html; charset=\"UTF-8\"\r\n")
 	message.WriteString("\r\n")
-	message.WriteString(rendered.body)
+	message.WriteString(normalizeSMTPBody(rendered.body))
 
 	return message.Bytes()
+}
+
+func normalizeSMTPBody(body string) string {
+	body = strings.TrimLeft(body, "\r\n")
+	body = strings.ReplaceAll(body, "\r\n", "\n")
+	body = strings.ReplaceAll(body, "\r", "\n")
+	return strings.ReplaceAll(body, "\n", "\r\n")
 }
 
 func validateAddress(address string) error {
