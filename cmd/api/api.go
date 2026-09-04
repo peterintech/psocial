@@ -71,13 +71,23 @@ type basicAuthConfig struct {
 }
 
 type mailConfig struct {
+	provider  string
 	sendGrid  sendGridConfig
+	smtp      smtpConfig
 	exp       time.Duration
+	fromName  string
 	fromEmail string
 }
 
 type sendGridConfig struct {
 	apiKey string
+}
+
+type smtpConfig struct {
+	host     string
+	port     int
+	username string
+	password string
 }
 
 type dbConfig struct {

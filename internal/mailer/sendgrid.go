@@ -1,9 +1,8 @@
 package mailer
 
 import (
-	"bytes"
+	"context"
 	"fmt"
-	"text/template"
 	"time"
 
 	"github.com/sendgrid/sendgrid-go"
@@ -11,55 +10,57 @@ import (
 )
 
 type SendGridMailer struct {
+	fromName  string
 	fromEmail string
 	apiKey    string
 	client    *sendgrid.Client
 }
 
-func NewSendGridMailer(fromEmail, apiKey string) *SendGridMailer {
+func NewSendGridMailer(fromName, fromEmail, apiKey string) *SendGridMailer {
 	client := sendgrid.NewSendClient(apiKey)
 	return &SendGridMailer{
+		fromName:  fromName,
 		fromEmail: fromEmail,
 		apiKey:    apiKey,
 		client:    client,
 	}
 }
 
-func (s *SendGridMailer) Send(templateFile, username, email string, data any, isSandbox bool) (int, error) {
-	from := mail.NewEmail(FromName, s.fromEmail)
+func (s *SendGridMailer) Send(ctx context.Context, templateFile, username, email string, data any) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	from := mail.NewEmail(s.fromName, s.fromEmail)
 	to := mail.NewEmail(username, email)
 
-	//template parsing and building
-	tmpl, err := template.ParseFS(FS, "templates/"+templateFile)
+	rendered, err := renderTemplate(templateFile, data)
 	if err != nil {
-		return 500, fmt.Errorf("failed to parse template: %w", err)
-	}
-	var subject, body bytes.Buffer
-
-	err = tmpl.ExecuteTemplate(&subject, "subject", data)
-	if err != nil {
-		return 500, err
+		return err
 	}
 
-	err = tmpl.ExecuteTemplate(&body, "body", data)
-	if err != nil {
-		return 500, err
-	}
-
-	message := mail.NewSingleEmail(from, subject.String(), to, "", body.String())
-
-	message.SetMailSettings(&mail.MailSettings{SandboxMode: &mail.Setting{
-		Enable: &isSandbox,
-	}})
+	message := mail.NewSingleEmail(from, rendered.subject, to, "", rendered.body)
 
 	var retryErr error
 	for i := range maxRetries {
-		res, retryErr := s.client.Send(message)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		_, retryErr = s.client.Send(message)
 		if retryErr != nil {
-			time.Sleep(time.Second * time.Duration(i+1))
+			if i < maxRetries-1 {
+				timer := time.NewTimer(time.Second * time.Duration(i+1))
+				select {
+				case <-ctx.Done():
+					timer.Stop()
+					return ctx.Err()
+				case <-timer.C:
+				}
+			}
 			continue
 		}
-		return res.StatusCode, nil
+		return nil
 	}
-	return -1, fmt.Errorf("failed to send email to %s after %d attempts, error: %v", email, maxRetries, retryErr)
+	return fmt.Errorf("failed to send email to %s after %d attempts: %w", email, maxRetries, retryErr)
 }
