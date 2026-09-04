@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.0.0](https://github.com/peterintech/psocial/compare/v1.2.0...v2.0.0) (2026-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove unnecessary logs
+
+### Features
+
+* **mailer:** add configurable SMTP delivery ([bc458b5](https://github.com/peterintech/psocial/commit/bc458b5839866a5060bef18cdc5d1ec37434b626))
+* **users:** add private profiles and relationship status ([aa229a8](https://github.com/peterintech/psocial/commit/aa229a8e3a26e8f1a18f6baea552054dc89ff9ac))
+
+
+### Bug Fixes
+
+* **api:** align authentication and CORS behavior ([230debe](https://github.com/peterintech/psocial/commit/230debe5278867774932a6fa00a8d4155f273601))
+* improve erorr handling ([c7aba6b](https://github.com/peterintech/psocial/commit/c7aba6b5ac6354adaf57d1bb74ecb3d7b5fc5d4a))
+* **mailer:** normalize SMTP body line endings ([e2abe69](https://github.com/peterintech/psocial/commit/e2abe695cf03128406ecc54e15518bf2482ec0ce))
+* **mailer:** validate delivery responses and sender headers ([46102a2](https://github.com/peterintech/psocial/commit/46102a2389ed041ea5994dd3070a228925375bd7))
+* **posts:** populate author IDs in responses ([803d2ae](https://github.com/peterintech/psocial/commit/803d2ae5d0cb47a12e0e09e6ab517b4cfba4431a))
+* **posts:** return conflict for stale updates ([b028285](https://github.com/peterintech/psocial/commit/b028285c2d20f7654281556d92377ac441ec2e88))
+* **posts:** use authenticated actors and expose authors ([4579998](https://github.com/peterintech/psocial/commit/457999801496a07a9107c1c8e22113312ad360da))
+* remove unnecessary logs ([d831f31](https://github.com/peterintech/psocial/commit/d831f3182bba32bcbfb8df5aa3c499c4346c8ec1))
+
 ## [1.2.0](https://github.com/peterintech/psocial/compare/v1.1.0...v1.2.0) (2026-08-29)
 
 
