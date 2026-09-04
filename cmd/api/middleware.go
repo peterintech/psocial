@@ -126,7 +126,6 @@ func (app *application) checkRolePrecedence(ctx context.Context, user *store.Use
 
 func (app *application) getUser(ctx context.Context, userID string) (*store.User, error) {
 	if !app.config.redisCfg.enabled {
-		fmt.Println("-- redis is disabled --")
 		return app.store.Users.GetByID(ctx, userID)
 	}
 
@@ -143,9 +142,6 @@ func (app *application) getUser(ctx context.Context, userID string) (*store.User
 		if err := app.cacheStorage.Users.Set(ctx, user); err != nil {
 			return nil, err
 		}
-	} else {
-		fmt.Println("-- redis has the user --")
-
 	}
 
 	return user, nil
