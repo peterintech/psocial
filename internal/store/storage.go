@@ -10,8 +10,9 @@ import (
 var (
 	ErrNotFound          = errors.New("record not found")
 	ErrConflict          = errors.New("record already exists")
-	ErrDuplicateEmail    = errors.New("a user already exists with this email")
-	ErrDuplicateUsername = errors.New("a user already exists with this username")
+	ErrVersionConflict   = errors.New("post was modified by another request")
+	ErrDuplicateEmail    = errors.New("email already exists")
+	ErrDuplicateUsername = errors.New("username already exists")
 	QueryTimeoutDuration = 5 * time.Second
 )
 
@@ -38,6 +39,7 @@ type Storage struct {
 	Followers interface {
 		Follow(ctx context.Context, followerID, userID string) error
 		Unfollow(ctx context.Context, unfollowedID, userID string) error
+		IsFollowing(ctx context.Context, followerID, userID string) (bool, error)
 	}
 	Roles interface {
 		GetByName(ctx context.Context, name string) (*Role, error)

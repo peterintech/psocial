@@ -4,8 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -85,9 +85,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Token: plainToken,
 	}
 
-	activationURL := app.config.frontendURL + "/auth/activate?token=" + plainToken
-	isProduction := app.config.env == "production"
-
+	activationURL := strings.TrimRight(app.config.frontendURL, "/") + "/auth/activate?token=" + plainToken
 	vars := struct {
 		Username      string
 		ActivationURL string
@@ -96,8 +94,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		ActivationURL: activationURL,
 	}
 	//send mail
-	status, err := app.mailer.Send(mailer.UserWelcomeTemplate, user.Username, user.Email, vars, !isProduction)
-	if err != nil {
+	if err := app.mailer.Send(r.Context(), mailer.UserWelcomeTemplate, user.Username, user.Email, vars); err != nil {
 		app.logger.Errorw("failed to send welcome email", "error", err, "userID", user.ID)
 
 		// rollback the user creation by deleting the user from the database (SAGA pattern)
@@ -109,7 +106,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	app.logger.Infow("Email sent", "status code", status)
+	app.logger.Infow("Email sent", "provider", app.config.mail.provider, "userID", user.ID)
 
 	if err := app.jsonResponse(w, http.StatusCreated, userWithToken); err != nil {
 		app.internalServerError(w, r, err)
@@ -155,7 +152,7 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		switch err {
 		case store.ErrNotFound:
-			app.unauthorizedError(w, r, err)
+			app.notFoundError(w, r, err)
 		default:
 			app.internalServerError(w, r, err)
 		}
@@ -164,7 +161,6 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 
 	// verify password
 	if err := user.Password.Compare(payload.Password); err != nil {
-		log.Print("pass err: ", err)
 		app.unauthorizedError(w, r, fmt.Errorf("invalid Password"))
 		return
 	}

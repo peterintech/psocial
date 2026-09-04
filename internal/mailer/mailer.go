@@ -1,6 +1,11 @@
 package mailer
 
-import "embed"
+import (
+	"context"
+	"embed"
+	"fmt"
+	"strings"
+)
 
 const (
 	FromName            = "Psocial"
@@ -13,5 +18,15 @@ const (
 var FS embed.FS
 
 type Client interface {
-	Send(templateFile, username, email string, data any, isSandbox bool) (int, error)
+	Send(ctx context.Context, templateFile, username, email string, data any) error
+}
+
+func validateDisplayName(name string) error {
+	if strings.TrimSpace(name) == "" {
+		return fmt.Errorf("display name cannot be empty")
+	}
+	if strings.ContainsAny(name, "\r\n") {
+		return fmt.Errorf("display name contains invalid newline characters")
+	}
+	return nil
 }

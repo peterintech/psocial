@@ -44,10 +44,12 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 }
 
 func (s *PostStore) GetByID(ctx context.Context, postID string) (*Post, error) {
-	query := `SELECT id, content, title, tags, version, user_id, created_at, updated_at FROM posts WHERE id = $1`
+	query := `SELECT p.id, p.content, p.title, p.tags, p.version, p.user_id,
+		p.created_at, p.updated_at, u.username
+		FROM posts p JOIN users u ON u.id = p.user_id WHERE p.id = $1`
 
-	post := &Post{}
-	err := s.db.QueryRowContext(ctx, query, postID).Scan(&post.ID, &post.Content, &post.Title, pq.Array(&post.Tags), &post.Version, &post.UserID, &post.CreatedAt, &post.UpdatedAt)
+	post := &Post{User: &User{}}
+	err := s.db.QueryRowContext(ctx, query, postID).Scan(&post.ID, &post.Content, &post.Title, pq.Array(&post.Tags), &post.Version, &post.UserID, &post.CreatedAt, &post.UpdatedAt, &post.User.Username)
 
 	if err != nil {
 		switch {
@@ -57,6 +59,7 @@ func (s *PostStore) GetByID(ctx context.Context, postID string) (*Post, error) {
 			return nil, err
 		}
 	}
+	post.User.ID = post.UserID
 
 	return post, nil
 }
@@ -72,7 +75,7 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return ErrNotFound
+			return ErrVersionConflict
 		default:
 			return err
 		}
@@ -140,6 +143,7 @@ func (s *PostStore) GetUserFeeds(ctx context.Context, userID string, fq Paginate
 		if err != nil {
 			return nil, err
 		}
+		post.User.ID = post.UserID
 		feeds = append(feeds, post)
 	}
 

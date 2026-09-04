@@ -12,6 +12,16 @@ type userKey string
 
 const userContextKey userKey = "user"
 
+type publicUserProfile struct {
+	ID        string `json:"id"`
+	Username  string `json:"username"`
+	CreatedAt string `json:"created_at"`
+}
+
+type relationshipResponse struct {
+	IsFollowing bool `json:"is_following"`
+}
+
 // GetUser godoc
 //
 //	@Summary		Fetches a user profile
@@ -46,9 +56,46 @@ func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := app.jsonResponse(w, http.StatusOK, user); err != nil {
+	profile := publicUserProfile{}
+	if user != nil {
+		profile = publicUserProfile{ID: user.ID, Username: user.Username, CreatedAt: user.CreatedAt}
+	}
+	if err := app.jsonResponse(w, http.StatusOK, profile); err != nil {
 		app.internalServerError(w, r, err)
 		return
+	}
+}
+
+// getCurrentUserHandler returns the authenticated user's private account details.
+func (app *application) getCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+	if err := app.jsonResponse(w, http.StatusOK, app.getUserFromContext(r)); err != nil {
+		app.internalServerError(w, r, err)
+	}
+}
+
+// getRelationshipHandler returns whether the authenticated user follows the profile.
+func (app *application) getRelationshipHandler(w http.ResponseWriter, r *http.Request) {
+	viewer := app.getUserFromContext(r)
+	targetID := chi.URLParam(r, "userID")
+	if viewer.ID == targetID {
+		_ = app.jsonResponse(w, http.StatusOK, relationshipResponse{IsFollowing: false})
+		return
+	}
+	if _, err := app.getUser(r.Context(), targetID); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			app.notFoundError(w, r, err)
+		} else {
+			app.internalServerError(w, r, err)
+		}
+		return
+	}
+	following, err := app.store.Followers.IsFollowing(r.Context(), viewer.ID, targetID)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+	if err := app.jsonResponse(w, http.StatusOK, relationshipResponse{IsFollowing: following}); err != nil {
+		app.internalServerError(w, r, err)
 	}
 }
 

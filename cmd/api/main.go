@@ -62,10 +62,18 @@ func main() {
 		},
 		env: env.GetEnv("ENV", "development"),
 		mail: mailConfig{
+			provider:  env.GetEnv("MAIL_PROVIDER", "sendgrid"),
 			exp:       time.Hour * 24 * 3, // 3 days
+			fromName:  env.GetEnv("MAIL_FROM_NAME", mailer.FromName),
 			fromEmail: env.GetEnv("MAIL_FROM_EMAIL", "peter@cloverkrafts.com"),
 			sendGrid: sendGridConfig{
 				apiKey: env.GetEnv("SENDGRID_API_KEY", ""),
+			},
+			smtp: smtpConfig{
+				host:     env.GetEnv("SMTP_HOST", "smtp.gmail.com"),
+				port:     env.GetEnvAsInt("SMTP_PORT", 587),
+				username: env.GetEnv("SMTP_USERNAME", ""),
+				password: env.GetEnv("SMTP_PASSWORD", ""),
 			},
 		},
 		auth: authConfig{
@@ -114,7 +122,10 @@ func main() {
 
 	rateLimiter := ratelimiter.NewFixedWindowRateLimiter(cfg.rateLimiter.RequestsPerTimeFrame, cfg.rateLimiter.TimeFrame)
 
-	mailer := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGrid.apiKey)
+	mailClient, err := resolveNewMailer(cfg.mail)
+	if err != nil {
+		logger.Fatalw("invalid mail configuration", "error", err)
+	}
 
 	jwtAuthenticator := auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.iss, cfg.auth.token.iss) // 24 hours
 
@@ -123,7 +134,7 @@ func main() {
 		store:         store,
 		cacheStorage:  cacheStorage,
 		logger:        logger,
-		mailer:        mailer,
+		mailer:        mailClient,
 		authenticator: jwtAuthenticator,
 		rateLimiter:   rateLimiter,
 	}

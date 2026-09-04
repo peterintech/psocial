@@ -5,8 +5,10 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"time"
 
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,6 +62,15 @@ func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 	err := s.db.QueryRowContext(ctx, query, user.Username, user.Email, user.Password.hash, role.Name).Scan(&user.ID, &user.CreatedAt)
 
 	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+			switch pqErr.Constraint {
+			case "users_email_key":
+				return ErrDuplicateEmail
+			case "users_username_key":
+				return ErrDuplicateUsername
+			}
+		}
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
