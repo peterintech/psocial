@@ -52,8 +52,8 @@ func NewSMTPMailer(cfg SMTPConfig) (*SMTPMailer, error) {
 	if cfg.Password == "" {
 		return nil, fmt.Errorf("SMTP_PASSWORD is required")
 	}
-	if cfg.FromName == "" {
-		return nil, fmt.Errorf("MAIL_FROM_NAME is required")
+	if err := validateDisplayName(cfg.FromName); err != nil {
+		return nil, fmt.Errorf("invalid MAIL_FROM_NAME: %w", err)
 	}
 	if err := validateAddress(cfg.FromEmail); err != nil {
 		return nil, fmt.Errorf("invalid MAIL_FROM_EMAIL: %w", err)

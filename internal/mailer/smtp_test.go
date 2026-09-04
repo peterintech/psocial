@@ -38,6 +38,7 @@ func TestNewSMTPMailerValidatesConfiguration(t *testing.T) {
 		{name: "username", mutate: func(cfg *SMTPConfig) { cfg.Username = "" }},
 		{name: "password", mutate: func(cfg *SMTPConfig) { cfg.Password = "" }},
 		{name: "from name", mutate: func(cfg *SMTPConfig) { cfg.FromName = "" }},
+		{name: "from name header injection", mutate: func(cfg *SMTPConfig) { cfg.FromName = "Psocial\r\nBcc: attacker@example.com" }},
 		{name: "from email", mutate: func(cfg *SMTPConfig) { cfg.FromEmail = "invalid" }},
 	}
 

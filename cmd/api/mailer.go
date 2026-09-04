@@ -10,7 +10,7 @@ import (
 func resolveNewMailer(cfg mailConfig) (mailer.Client, error) {
 	switch strings.ToLower(strings.TrimSpace(cfg.provider)) {
 	case "sendgrid":
-		return mailer.NewSendGridMailer(cfg.fromName, cfg.fromEmail, cfg.sendGrid.apiKey), nil
+		return mailer.NewSendGridMailer(cfg.fromName, cfg.fromEmail, cfg.sendGrid.apiKey)
 	case "smtp":
 		return mailer.NewSMTPMailer(mailer.SMTPConfig{
 			Host:      cfg.smtp.host,
