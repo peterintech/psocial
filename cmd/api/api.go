@@ -121,11 +121,13 @@ func (app *application) mount() *chi.Mux {
 
 		r.Route("/users", func(r chi.Router) {
 			r.Put("/activate/{token}", app.activateUserHandler)
+			r.With(app.AuthTokenMiddleware).Get("/me", app.getCurrentUserHandler)
 
 			r.Route("/{userID}", func(r chi.Router) {
 				r.Use(app.AuthTokenMiddleware)
 
 				r.Get("/", app.getUserHandler)
+				r.Get("/relationship", app.getRelationshipHandler)
 				r.Put("/follow", app.followUserHandler)
 				r.Put("/unfollow", app.unfollowUserHandler)
 			})
