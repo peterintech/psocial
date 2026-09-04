@@ -365,6 +365,10 @@ const docTemplate = `{
                         "description": "Not Found",
                         "schema": {}
                     },
+                    "409": {
+                        "description": "Post was modified by another request",
+                        "schema": {}
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {}

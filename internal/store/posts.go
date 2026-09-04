@@ -75,7 +75,7 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return ErrNotFound
+			return ErrVersionConflict
 		default:
 			return err
 		}

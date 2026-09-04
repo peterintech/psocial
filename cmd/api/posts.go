@@ -124,6 +124,7 @@ type UpdatePostPayload struct {
 //	@Success		200		{object}	store.Post
 //	@Failure		400		{object}	error
 //	@Failure		404		{object}	error
+//	@Failure		409		{object}	error	"Post was modified by another request"
 //	@Failure		500		{object}	error
 //	@Security		ApiKeyAuth
 //	@Router			/posts/{postID} [patch]
@@ -156,6 +157,10 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := app.store.Posts.Update(r.Context(), post); err != nil {
+		if errors.Is(err, store.ErrVersionConflict) {
+			app.conflictError(w, r, err)
+			return
+		}
 		app.internalServerError(w, r, err)
 		return
 	}

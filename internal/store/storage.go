@@ -10,6 +10,7 @@ import (
 var (
 	ErrNotFound          = errors.New("record not found")
 	ErrConflict          = errors.New("record already exists")
+	ErrVersionConflict   = errors.New("post was modified by another request")
 	ErrDuplicateEmail    = errors.New("email already exists")
 	ErrDuplicateUsername = errors.New("username already exists")
 	QueryTimeoutDuration = 5 * time.Second
