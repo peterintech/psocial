@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -85,7 +86,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Token: plainToken,
 	}
 
-	activationURL := app.config.frontendURL + "/auth/activate?token=" + plainToken
+	activationURL := strings.TrimRight(app.config.frontendURL, "/") + "/auth/activate?token=" + plainToken
 	isProduction := app.config.env == "production"
 
 	vars := struct {
@@ -155,7 +156,7 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		switch err {
 		case store.ErrNotFound:
-			app.unauthorizedError(w, r, err)
+			app.notFoundError(w, r, err)
 		default:
 			app.internalServerError(w, r, err)
 		}
