@@ -59,6 +59,7 @@ func (s *PostStore) GetByID(ctx context.Context, postID string) (*Post, error) {
 			return nil, err
 		}
 	}
+	post.User.ID = post.UserID
 
 	return post, nil
 }
@@ -142,6 +143,7 @@ func (s *PostStore) GetUserFeeds(ctx context.Context, userID string, fq Paginate
 		if err != nil {
 			return nil, err
 		}
+		post.User.ID = post.UserID
 		feeds = append(feeds, post)
 	}
 
