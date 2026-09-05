@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/peterintech/psocial/compare/v2.0.0...v2.0.1) (2026-09-05)
+
+
+### Bug Fixes
+
+* api test unexpected failure due to limiter api modification ([a3054d6](https://github.com/peterintech/psocial/commit/a3054d618e4093d277698ba8bae0b77bf4da1d09))
+* rate limiter scoped to other apis apart from health & metrics check ([ea7b029](https://github.com/peterintech/psocial/commit/ea7b0295f968fcbe9df7c146df882d7144d9b4c6))
+
 ## [2.0.0](https://github.com/peterintech/psocial/compare/v1.2.0...v2.0.0) (2026-09-04)
 
 
