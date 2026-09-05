@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/peterintech/psocial/internal/auth"
+	"github.com/peterintech/psocial/internal/mailer"
 	"github.com/peterintech/psocial/internal/ratelimiter"
 	"github.com/peterintech/psocial/internal/store"
 	"github.com/peterintech/psocial/internal/store/cache"
@@ -23,6 +24,7 @@ func newTestApplication(t *testing.T, cfg config) *application {
 		cfg.rateLimiter.RequestsPerTimeFrame,
 		cfg.rateLimiter.TimeFrame,
 	)
+	mockMailer := mailer.NewMockMailer()
 
 	testAuth := &auth.TestAuthenticator{}
 
@@ -33,6 +35,7 @@ func newTestApplication(t *testing.T, cfg config) *application {
 		cacheStorage:  mockCacheStore,
 		rateLimiter:   rateLimiter,
 		authenticator: testAuth,
+		mailer:        mockMailer,
 	}
 
 	return app

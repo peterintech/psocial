@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,12 +25,13 @@ func TestRateLimiterMiddleware(t *testing.T) {
 	defer ts.Close()
 
 	client := &http.Client{}
-	baseUrl := ts.URL + "/v1/health"
+	baseUrl := ts.URL + "/v1/auth/register" // Using the /token endpoint for testing
 	mockIP := "192.168.1.1"
 	marginOfError := 2
+	body := []byte(`{"username":"testuser", "email":"testuser@gmail.com","password":"password"}`)
 
 	for i := 0; i < cfg.rateLimiter.RequestsPerTimeFrame+marginOfError; i++ {
-		req, err := http.NewRequest("GET", baseUrl, nil)
+		req, err := http.NewRequest("POST", baseUrl, bytes.NewBuffer(body))
 		if err != nil {
 			t.Fatalf("could not create request: %v", err)
 		}
@@ -43,7 +45,7 @@ func TestRateLimiterMiddleware(t *testing.T) {
 		resp.Body.Close()
 
 		if i < cfg.rateLimiter.RequestsPerTimeFrame {
-			if resp.StatusCode != http.StatusOK {
+			if resp.StatusCode != http.StatusCreated {
 				t.Errorf("expected status OK; got %v", resp.Status)
 			}
 		} else {
