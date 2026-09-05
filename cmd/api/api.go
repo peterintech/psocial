@@ -112,11 +112,11 @@ func (app *application) mount() *chi.Mux {
 		MaxAge:           300,
 	}))
 	r.Use(middleware.Logger)
-	r.Use(app.RateLimiterMiddleware)
 
 	r.Route("/v1", func(r chi.Router) {
 		// operations
 		r.Get("/health", app.healthCheckHandler)
+
 		r.With(app.BasicAuthMiddleware()).Get("/metrics", expvar.Handler().ServeHTTP)
 
 		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
@@ -124,12 +124,14 @@ func (app *application) mount() *chi.Mux {
 
 		// Public routes
 		r.Route("/auth", func(r chi.Router) {
+			r.Use(app.RateLimiterMiddleware)
 			r.Post("/register", app.registerUserHandler)
 			// r.Post("/login", app.loginUserHandler)
 			r.Post("/token", app.createTokenHandler)
 		})
 
 		r.Route("/users", func(r chi.Router) {
+			r.Use(app.RateLimiterMiddleware)
 			r.Put("/activate/{token}", app.activateUserHandler)
 			r.With(app.AuthTokenMiddleware).Get("/me", app.getCurrentUserHandler)
 
@@ -149,6 +151,7 @@ func (app *application) mount() *chi.Mux {
 		})
 
 		r.Route("/posts", func(r chi.Router) {
+			r.Use(app.RateLimiterMiddleware)
 			r.Use(app.AuthTokenMiddleware)
 			r.Post("/", app.createPostHandler)
 
